@@ -1,7 +1,7 @@
 {
     "name": "xtompie/criteria",
     "type": "library",
-    "description": "Criteria - value objec to handling filter/where, order, limit, paging",
+    "description": "Criteria - value object to handling filter/where, order, limit, paging",
     "keywords": ["criteria", "filter"],
     "license": "MIT",
     "authors": [
