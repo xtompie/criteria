@@ -18,6 +18,60 @@ class Criteria
         return new static($where, $order, $limit, $offset);
     }
 
+    public static function ofInput(
+        array $input,
+        ?string $orderField = 'sort',
+        ?array $orderOptions = null,
+        ?string $orderDefault = null,
+        ?string $pageField = 'page',
+        ?int $pageDefault = null,
+        ?string $perpageField = 'perpage',
+        ?int $perpageMin = null,
+        ?int $perpageMax = null,
+        ?array $perpageOptions = null,
+        ?int $perpageDefault = null,
+        ?array $whereValid = null,
+    ): Criteria
+    {
+        $order = $input[$orderField] ?? null;
+        unset($input[$orderField]);
+        if ($orderOptions && !in_array($order, $orderOptions)) {
+            $order = null;
+        }
+        if ($order === null) {
+            $order = $orderDefault;
+        }
+
+        $page = isset($input[$pageField]) ? (int)$input[$pageField] : $pageDefault;
+        unset($input[$pageField]);
+
+        $perpage = isset($input[$perpageField]) ? (int)$input[$perpageField] : null;
+        unset($input[$perpageField]);
+        if ($perpage !== null && $perpageMin !== null && $perpage < $perpageMin) {
+            $perpage = null;
+        }
+        if ($perpage !== null && $perpageMax !== null && $perpage > $perpageMax) {
+            $perpage = null;
+        }
+
+        if ($perpage !== null && $perpageOptions !== null && !in_array($perpage, $perpageOptions)) {
+            $perpage = null;
+        }
+        if ($perpage === null && $perpageDefault !== null) {
+            $perpage = $perpageDefault;
+        }
+
+        if ($whereValid != null) {
+            $input = array_filter($input, fn ($key) => in_array($key, $whereValid), ARRAY_FILTER_USE_KEY);
+        }
+
+        $criteria = new Criteria($input, $order);
+        if ($perpage !== null) {
+            $criteria = $criteria->paginate((int)$page, (int)$perpage);
+        }
+        return $criteria;
+    }
+
     public function __construct(
         protected ?array $where = null,
         protected ?string $order = null,
@@ -163,7 +217,7 @@ class Criteria
 
     public function page(): ?int
     {
-        if ($this->offset() === null || $this->limit() === null) {
+        if ($this->offset() === null || $this->limit() === null || $this->limit() === 0) {
             return null;
         }
 
