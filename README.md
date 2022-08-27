@@ -1,4 +1,4 @@
-# Array Query Language
+# Criteria
 
 Criteria - value object to handling filter/where, order, limit, paging
 
